@@ -8,8 +8,8 @@ COPY . .
 EXPOSE 3000
 RUN npm run build
 
-FROM nginx:alpine AS production
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+FROM nginxinc/nginx-unprivileged AS production
+#COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/build /usr/share/nginx/html
 
 EXPOSE 8080
