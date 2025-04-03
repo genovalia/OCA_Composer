@@ -14,5 +14,5 @@ docker login -u `oc whoami` -p `oc whoami --show-token` registre.apps.ul-pca-pr-
 echo "Push image"
 docker push registre.apps.ul-pca-pr-ul01.ulaval.ca/ul-val-genovalia-pr/semantic-engine:latest
 
-#echo "Deploying image"
-#oc rollout latest dc/site-web-genovalia
+echo "Deploying image"
+oc rollout latest dc/semantic-engine
