@@ -1,0 +1,87 @@
+# openshift deployment config
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+
+metadata:
+  name: semantic-engine
+  labels:
+    app: semantic-engine
+  namespace: ul-val-genovalia-pr
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  selector:
+    app: semantic-engine
+    deploymentconfig: semantic-engine
+  strategy:
+    type: Rolling
+    resources: {}
+    activeDeadlineSeconds: 21600
+  template:
+    metadata:
+      labels:
+        app: semantic-engine
+        deploymentconfig: semantic-engine
+    spec:
+      containers:
+        - name: semantic-engine
+          securityContext:
+            runAsUser: 1002360001
+            runAsGroup: 1002360001
+          image: registre.apps.ul-pca-pr-ul01.ulaval.ca/ul-val-genovalia-pr/semantic-engine:latest
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 250m
+              memory: 512Mi
+            requests:
+              cpu: 250m
+              memory: 512Mi
+
+
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 10
+      dnsPolicy: ClusterFirst
+      schedulerName: default-scheduler
+---
+# service
+apiVersion: v1
+kind: Service
+metadata:
+  name: semantic-engine-service
+  labels:
+    app: semantic-engine
+  namespace: ul-val-genovalia-pr
+spec:
+  ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: semantic-engine
+  sessionAffinity: None
+  type: ClusterIP
+---
+# route
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: semantic-engine
+  labels:
+    app: semantic-engine
+  namespace: ul-val-genovalia-pr
+spec:
+  host: semantic-engine.apps.genovalia.ulaval.ca
+  port:
+    targetPort: 8080-tcp
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  to:
+    kind: Service
+    name: semantic-engine-service
+    weight: 100
+  wildcardPolicy: None
